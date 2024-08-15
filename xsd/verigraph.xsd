@@ -11,6 +11,7 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="FIREWALL" />
             <xsd:enumeration value="ENDHOST" />
+            <xsd:enumeration value="SWITCH"/>
             <xsd:enumeration value="ENDPOINT" />
             <xsd:enumeration value="ANTISPAM" />
             <xsd:enumeration value="CACHE" />
