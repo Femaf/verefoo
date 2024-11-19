@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<NFV xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="./xsd/nfvSchema.xsd">
+    <graphs>
+        <graph id="0">
+            <node name="17.201.117.186" functional_type="WEBCLIENT">
+                <neighbour name="230.48.78.137"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="216.136.194.17"/>
+                </configuration>
+            </node>
+            <node name="249.149.30.7" functional_type="WEBCLIENT">
+                <neighbour name="230.48.78.137"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="184.89.123.132"/>
+                </configuration>
+            </node>
+            <node name="241.45.179.224" functional_type="WEBCLIENT">
+                <neighbour name="230.48.78.137"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="143.72.147.90"/>
+                </configuration>
+            </node>
+            <node name="66.192.37.167" functional_type="WEBCLIENT">
+                <neighbour name="230.48.78.137"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="62.75.101.72"/>
+                </configuration>
+            </node>
+            <node name="63.236.41.144" functional_type="WEBCLIENT">
+                <neighbour name="113.122.154.217"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="216.136.194.17"/>
+                </configuration>
+            </node>
+            <node name="112.130.128.226" functional_type="WEBCLIENT">
+                <neighbour name="113.122.154.217"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="55.203.220.191"/>
+                </configuration>
+            </node>
+            <node name="1.247.83.182" functional_type="WEBCLIENT">
+                <neighbour name="113.122.154.217"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="87.143.190.1"/>
+                </configuration>
+            </node>
+            <node name="188.205.171.230" functional_type="WEBCLIENT">
+                <neighbour name="113.122.154.217"/>
+                <configuration name="confC">
+                    <webclient nameWebServer="62.75.101.72"/>
+                </configuration>
+            </node>
+            <node name="216.136.194.17" functional_type="WEBSERVER">
+                <neighbour name="128.253.179.105"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>216.136.194.17</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="184.89.123.132" functional_type="WEBSERVER">
+                <neighbour name="128.253.179.105"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>184.89.123.132</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="195.111.10.113" functional_type="WEBSERVER">
+                <neighbour name="128.253.179.105"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>195.111.10.113</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="87.143.190.1" functional_type="WEBSERVER">
+                <neighbour name="128.253.179.105"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>87.143.190.1</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="62.75.101.72" functional_type="WEBSERVER">
+                <neighbour name="180.21.121.8"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>62.75.101.72</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="106.218.232.86" functional_type="WEBSERVER">
+                <neighbour name="180.21.121.8"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>106.218.232.86</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="143.72.147.90" functional_type="WEBSERVER">
+                <neighbour name="180.21.121.8"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>143.72.147.90</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="55.203.220.191" functional_type="WEBSERVER">
+                <neighbour name="180.21.121.8"/>
+                <configuration name="confS">
+                    <webserver>
+                        <name>55.203.220.191</name>
+                    </webserver>
+                </configuration>
+            </node>
+            <node name="128.253.179.105" functional_type="FORWARDER">
+                <neighbour name="216.136.194.17"/>
+                <neighbour name="184.89.123.132"/>
+                <neighbour name="195.111.10.113"/>
+                <neighbour name="87.143.190.1"/>
+                <neighbour name="230.48.78.137"/>
+                <neighbour name="113.122.154.217"/>
+            </node>
+            <node name="180.21.121.8" functional_type="FORWARDER">
+                <neighbour name="62.75.101.72"/>
+                <neighbour name="106.218.232.86"/>
+                <neighbour name="143.72.147.90"/>
+                <neighbour name="55.203.220.191"/>
+                <neighbour name="230.48.78.137"/>
+                <neighbour name="113.122.154.217"/>
+            </node>
+            <node name="230.48.78.137" functional_type="FORWARDER">
+                <neighbour name="17.201.117.186"/>
+                <neighbour name="249.149.30.7"/>
+                <neighbour name="241.45.179.224"/>
+                <neighbour name="66.192.37.167"/>
+                <neighbour name="128.253.179.105"/>
+                <neighbour name="180.21.121.8"/>
+            </node>
+            <node name="113.122.154.217" functional_type="FORWARDER">
+                <neighbour name="63.236.41.144"/>
+                <neighbour name="112.130.128.226"/>
+                <neighbour name="1.247.83.182"/>
+                <neighbour name="188.205.171.230"/>
+                <neighbour name="128.253.179.105"/>
+                <neighbour name="180.21.121.8"/>
+            </node>
+        </graph>
+    </graphs>
+    <Constraints>
+        <NodeConstraints/>
+        <LinkConstraints/>
+    </Constraints>
+    <PropertyDefinition>
+        <Property name="IsolationProperty" graph="0" src="1.247.83.182" dst="195.111.10.113" lv4proto="ANY" src_port="*" dst_port="*" isSat="false" body="DENY"/>
+        <Property name="IsolationProperty" graph="0" src="249.149.30.7" dst="216.136.194.17" lv4proto="ANY" src_port="*" dst_port="*" isSat="false" body="DENY"/>
+        <Property name="ReachabilityProperty" graph="0" src="63.236.41.144" dst="55.203.220.191" lv4proto="ANY" src_port="*" dst_port="*" isSat="false" body="ALLOW"/>
+        <Property name="ReachabilityProperty" graph="0" src="66.192.37.167" dst="87.143.190.1" lv4proto="ANY" src_port="*" dst_port="*" isSat="false" body="ALLOW"/>
+        <Property name="IsolationProperty" graph="0" src="17.201.117.186" dst="195.111.10.113" lv4proto="ANY" src_port="*" dst_port="*" isSat="false" body="DENY"/>
+    </PropertyDefinition>
+</NFV>

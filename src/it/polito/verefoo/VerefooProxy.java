@@ -781,23 +781,28 @@ public class VerefooProxy {
 				List<Predicate> deniedList = new ArrayList<>();
 				
 				boolean deniedListChanged = false;
-				for(Elements rule: node.getConfiguration().getFirewall().getElements()) {
-					if(rule.getAction().equals(ActionTypes.DENY)) {
-						//deny <--- deny V rule-i
-						deniedList.add(new Predicate(rule.getSource(), false, rule.getDestination(), false, 
-								rule.getSrcPort(), false, rule.getDstPort(), false, rule.getProtocol()));
-						deniedListChanged = true;
-					} else {
-						//allowed <--- allowed V (rule-i AND !denied)
-						Predicate toAdd = new Predicate(rule.getSource(), false, rule.getDestination(), false, 
-								rule.getSrcPort(), false, rule.getDstPort(), false, rule.getProtocol());
-						List<Predicate> allowedToAdd = aputilsAP.computeAllowedForRule(toAdd, deniedList, deniedListChanged);
-						for(Predicate allow: allowedToAdd) {
-							if(!aputilsAP.isPredicateContainedIn(allow, allowedList))
-								allowedList.add(allow);
-						}
-					}
+				for (Elements rule : node.getConfiguration().getFirewall().getElements()) {
+				    if (rule.getAction() == null) {
+				        rule.setAction(ActionTypes.DENY);  // Default rule
+				    }
+
+				    if (rule.getAction().equals(ActionTypes.DENY)) {
+				        // deny <--- deny V rule-i
+				        deniedList.add(new Predicate(rule.getSource(), false, rule.getDestination(), false, 
+				                                     rule.getSrcPort(), false, rule.getDstPort(), false, rule.getProtocol()));
+				        deniedListChanged = true;
+				    } else {
+				        // allowed <--- allowed V (rule-i AND !denied)
+				        Predicate toAdd = new Predicate(rule.getSource(), false, rule.getDestination(), false, 
+				                                        rule.getSrcPort(), false, rule.getDstPort(), false, rule.getProtocol());
+				        List<Predicate> allowedToAdd = aputilsAP.computeAllowedForRule(toAdd, deniedList, deniedListChanged);
+				        for (Predicate allow : allowedToAdd) {
+				            if (!aputilsAP.isPredicateContainedIn(allow, allowedList))
+				                allowedList.add(allow);
+				        }
+				    }
 				}
+
 				//Check default action: if DENY do nothing
 				if(node.getConfiguration().getFirewall().getDefaultAction().equals(ActionTypes.ALLOW)) {
 					Predicate toAdd = new Predicate("*", false, "*", false, "*", false, "*", false, L4ProtocolTypes.ANY);
@@ -1294,51 +1299,52 @@ public class VerefooProxy {
 	 * @return true if a path has been identified, false otherwise
 	 */
 	private void recursivePathGenerationAP(List<List<AllocationNodeAP>> allPaths, List<AllocationNodeAP> currentPath, AllocationNodeAP source,
-			AllocationNodeAP destination, AllocationNodeAP current, Set<String> visited, int level) {
-		
-		currentPath.add(level, current);
-		visited.add(current.getNode().getName());
-		List<Neighbour> listNeighbours = current.getNode().getNeighbour();
-		if(destination.getNode().getName().equals(current.getNode().getName())) {
-			//I save the completed path and search for others
-			List<AllocationNodeAP> pathToStore = new ArrayList<>();
-			for(int i = 0; i < currentPath.size(); i++) {
-				if((currentPath.get(i).getNode().getFunctionalType() == FunctionalTypes.NAT 
-						|| currentPath.get(i).getNode().getFunctionalType() == FunctionalTypes.FIREWALL
-						&& !transformersNode.containsKey(currentPath.get(i).getNode().getName())))
-					transformersNode.put(currentPath.get(i).getNode().getName(), currentPath.get(i).getNode());
-				pathToStore.add(i, currentPath.get(i));
-			}
-			allPaths.add(pathToStore);
-			visited.remove(current.getNode().getName());
-			currentPath.remove(level);
-			return;
-		}
-		if(level != 0) {
-			if(current.getNode().getFunctionalType() == FunctionalTypes.WEBCLIENT || current.getNode().getFunctionalType() == FunctionalTypes.WEBSERVER) {
-				//traffic is not forwarded anymore
-				visited.remove(current.getNode().getName());
-				currentPath.remove(level);
-				return;
-			}
-		}
-		
-		
+	        AllocationNodeAP destination, AllocationNodeAP current, Set<String> visited, int level) {
+	    
+	    if (current == null) {
+	        System.err.println("Errore: 'current' è null. Interruzione del path generation.");
+	        return;
+	    }
 
-		for(Neighbour n : listNeighbours) {
-			if(!visited.contains(n.getName())) {
-				AllocationNodeAP neighbourNode = allocationNodesAP.get(n.getName());
-				level++;
-				recursivePathGenerationAP(allPaths, currentPath, source, destination, neighbourNode, visited, level);
-				level--;
-			}
-					
-		}
-		
-		visited.remove(current.getNode().getName());
-		currentPath.remove(level);
-		return;
+	    currentPath.add(level, current);
+	    visited.add(current.getNode().getName());
+
+	    List<Neighbour> listNeighbours = current.getNode().getNeighbour();
+
+	    if (destination.getNode().getName().equals(current.getNode().getName())) {
+	        // Salva il percorso completato
+	        List<AllocationNodeAP> pathToStore = new ArrayList<>(currentPath);
+	        allPaths.add(pathToStore);
+	        visited.remove(current.getNode().getName());
+	        currentPath.remove(level);
+	        return;
+	    }
+
+	    if (level != 0) {
+	        if (current.getNode().getFunctionalType() == FunctionalTypes.WEBCLIENT || current.getNode().getFunctionalType() == FunctionalTypes.WEBSERVER) {
+	            visited.remove(current.getNode().getName());
+	            currentPath.remove(level);
+	            return;
+	        }
+	    }
+
+	    for (Neighbour n : listNeighbours) {
+	        AllocationNodeAP neighbourNode = allocationNodesAP.get(n.getName());
+	        if (neighbourNode == null) {
+	            System.err.println("Errore: Nodo vicino " + n.getName() + " è null.");
+	            continue;  // Salta i vicini nulli
+	        }
+	        if (!visited.contains(neighbourNode.getNode().getName())) {
+	            level++;
+	            recursivePathGenerationAP(allPaths, currentPath, source, destination, neighbourNode, visited, level);
+	            level--;
+	        }
+	    }
+
+	    visited.remove(current.getNode().getName());
+	    currentPath.remove(level);
 	}
+
 
 
 

@@ -1,54 +1,45 @@
 package it.polito.verefoo.extra;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import it.polito.verefoo.jaxb.*;
 
 public class TestCaseGeneratorFatTree {
     NFV nfv;
     String name;
     Random rand;
-
     Set<String> allIPs;
     List<Node> allClients;
     List<Node> allServers;
     List<Node> allSwitches;
+    List<Node> allFirewalls;
 
-    public TestCaseGeneratorFatTree(String name, int numberPods, int numberClientsPerPod, int numberServersPerPod, int seed) {
+    private final int NODES_PER_SWITCH;
+
+    public TestCaseGeneratorFatTree(String name, int numberClients, int numberServers, int numSecurityRequirements, int nodesPerSwitch, int seed) {
         this.name = name;
         this.rand = new Random(seed);
+        this.NODES_PER_SWITCH = nodesPerSwitch;
 
         allClients = new ArrayList<>();
         allServers = new ArrayList<>();
         allSwitches = new ArrayList<>();
-
+        allFirewalls = new ArrayList<>();
         allIPs = new HashSet<>();
-        nfv = generateNFV(numberPods, numberClientsPerPod, numberServersPerPod, rand);
-    }
-
-    public NFV changeIP(int numberPods, int numberClientsPerPod, int numberServersPerPod, int seed) {
-        this.rand = new Random(seed);
-        allClients = new ArrayList<>();
-        allServers = new ArrayList<>();
-        allSwitches = new ArrayList<>();
-
-        allIPs = new HashSet<>();
-        return generateNFV(numberPods, numberClientsPerPod, numberServersPerPod, rand);
     }
 
     private String createIP() {
         String ip;
-        int first, second, third, forth;
-        first = rand.nextInt(256);
+        int first = rand.nextInt(256);
         if (first == 0) first++;
-        second = rand.nextInt(256);
-        third = rand.nextInt(256);
-        forth = rand.nextInt(256);
-        ip = first + "." + second + "." + third + "." + forth;
+        int second = rand.nextInt(256);
+        int third = rand.nextInt(256);
+        int fourth = rand.nextInt(256);
+        ip = first + "." + second + "." + third + "." + fourth;
         return ip;
     }
 
@@ -61,7 +52,7 @@ public class TestCaseGeneratorFatTree {
         return ip;
     }
 
-    public NFV generateNFV(int numberPods, int numberClientsPerPod, int numberServersPerPod, Random rand) {
+    public NFV generateFatTree(int numberClients, int numberServers, int numSecurityRequirements) {
         NFV nfv = new NFV();
         Graphs graphs = new Graphs();
         PropertyDefinition pd = new PropertyDefinition();
@@ -76,57 +67,60 @@ public class TestCaseGeneratorFatTree {
         Graph graph = new Graph();
         graph.setId((long) 0);
 
-        // Create servers
-        for (int i = 0; i < numberPods * numberServersPerPod; i++) {
-            Node server = createServer();
-            allServers.add(server);
+        int totalNodes = numberClients + numberServers;
+        int numberSwitches = (int) Math.ceil((double) totalNodes / NODES_PER_SWITCH);
+
+        for (int i = 0; i < numberSwitches; i++) {
+            Node switchNode = createSwitch();
+            allSwitches.add(switchNode);
         }
 
-        // Create clients
-        for (int i = 0; i < numberPods * numberClientsPerPod; i++) {
-            Node client = createClient(rand);
-            allClients.add(client);
-        }
-
-        // Create switches
-        for (int i = 0; i < numberPods * 2; i++) { // 2 switches per pod (core and aggregate)
-            Node sw = createSwitch();
-            allSwitches.add(sw);
-        }
-
-        // Attach nodes within each pod
-        for (int pod = 0; pod < numberPods; pod++) {
-            Node coreSwitch = allSwitches.get(pod * 2);
-            Node aggSwitch = allSwitches.get(pod * 2 + 1);
-
-            // Connect core switch to aggregate switch
-            addLink(coreSwitch, aggSwitch);
-
-            // Connect aggregate switch to servers
-            for (int s = 0; s < numberServersPerPod; s++) {
-                Node server = allServers.get(pod * numberServersPerPod + s);
-                addLink(aggSwitch, server);
-            }
-
-            // Connect aggregate switch to clients
-            for (int c = 0; c < numberClientsPerPod; c++) {
-                Node client = allClients.get(pod * numberClientsPerPod + c);
-                addLink(aggSwitch, client);
-            }
-        }
-
-        // Add nodes to graph
+        assignNodesToSwitches(numberClients, numberServers);
+        connectSwitches(numberSwitches);
         graph.getNode().addAll(allClients);
         graph.getNode().addAll(allServers);
         graph.getNode().addAll(allSwitches);
         nfv.getGraphs().getGraph().add(graph);
-
-        // Create properties (policies)
-        for (int i = 0; i < numberClientsPerPod * numberPods; i++) {
-            createPolicy(PName.REACHABILITY_PROPERTY, nfv, graph, allClients.get(i).getName(), allServers.get(i % allServers.size()).getName());
-        }
+        createSecurityPolicies(nfv, graph, numberClients, numberServers, numSecurityRequirements);
 
         return nfv;
+    }
+
+    private void assignNodesToSwitches(int numberClients, int numberServers) {
+        int switchIndex = 0;
+        int totalNodes = numberClients + numberServers;
+        int clientIndex = 0;
+        int serverIndex = 0;
+
+        for (int i = 0; i < totalNodes; i++) {
+            if (serverIndex < numberServers) {
+                Node server = createServer();
+                allServers.add(server);
+                addLink(allSwitches.get(switchIndex), server);
+                serverIndex++;
+            } else if (clientIndex < numberClients) {
+                Node client = createClient(rand);
+                allClients.add(client);
+                addLink(allSwitches.get(switchIndex), client);
+                clientIndex++;
+            }
+
+            if ((i + 1) % NODES_PER_SWITCH == 0) {
+                switchIndex = (switchIndex + 1) % allSwitches.size();
+            }
+        }
+
+        System.out.println("Number of servers generated: " + allServers.size());
+        System.out.println("Number of clients generated: " + allClients.size());
+    }
+    
+    private void connectSwitches(int numberSwitches) {
+        int half = numberSwitches / 2;
+        for (int i = 0; i < half; i++) {
+            for (int j = half; j < numberSwitches; j++) {
+                addLink(allSwitches.get(i), allSwitches.get(j));
+            }
+        }
     }
 
     private void addLink(Node from, Node to) {
@@ -139,12 +133,45 @@ public class TestCaseGeneratorFatTree {
         to.getNeighbour().add(reverseNeigh);
     }
 
+    private void createSecurityPolicies(NFV nfv, Graph graph, int numberClients, int numberServers, int numSecurityRequirements) {
+        Set<String> uniquePairs = new HashSet<>();
+        int generatedRequirements = 0;
+
+        while (generatedRequirements < numSecurityRequirements) {
+            int clientIndex = rand.nextInt(numberClients);
+            int serverIndex = rand.nextInt(numberServers);
+            String clientName = allClients.get(clientIndex).getName();
+            String serverName = allServers.get(serverIndex).getName();
+
+            if (!uniquePairs.contains(clientName + serverName)) {
+                boolean isReachability = rand.nextBoolean();
+                if (isReachability) {
+                    createPolicy(PName.REACHABILITY_PROPERTY, nfv, graph, clientName, serverName);
+                } else {
+                    createPolicy(PName.ISOLATION_PROPERTY, nfv, graph, clientName, serverName);
+                }
+                uniquePairs.add(clientName + serverName);
+                generatedRequirements++;
+            }
+        }
+    }
+
     private void createPolicy(PName type, NFV nfv, Graph graph, String src, String dst) {
         Property property = new Property();
         property.setName(type);
         property.setGraph((long) 0);
         property.setSrc(src);
         property.setDst(dst);
+        property.setLv4Proto(L4ProtocolTypes.ANY);
+        property.setSrcPort("*");
+        property.setDstPort("*");
+
+        if (type.equals(PName.ISOLATION_PROPERTY)) {
+            property.setBody("DENY");
+        } else if (type.equals(PName.REACHABILITY_PROPERTY)) {
+            property.setBody("ALLOW");
+        }
+
         nfv.getPropertyDefinition().getProperty().add(property);
     }
 
@@ -152,7 +179,7 @@ public class TestCaseGeneratorFatTree {
         String ip = createRandomIP();
         Node sw = new Node();
         sw.setName(ip);
-        sw.setFunctionalType(FunctionalTypes.SWITCH);
+        sw.setFunctionalType(FunctionalTypes.FORWARDER);
         return sw;
     }
 
@@ -176,6 +203,7 @@ public class TestCaseGeneratorFatTree {
         Node server = new Node();
         server.setFunctionalType(FunctionalTypes.WEBSERVER);
         server.setName(IPServer);
+
         Configuration confS = new Configuration();
         confS.setName("confS");
         Webserver ws = new Webserver();
@@ -185,20 +213,45 @@ public class TestCaseGeneratorFatTree {
         return server;
     }
 
-    public NFV getNfv() {
+    public List<Node> getAllClients() {
+        return allClients;
+    }
+
+    public List<Node> getAllServers() {
+        return allServers;
+    }
+
+    public NFV modifyNetworkPolicies(NFV nfv, double percReqKept) {
+        List<Property> properties = nfv.getPropertyDefinition().getProperty();
+        int numberKeptPolicies = (int) (properties.size() * percReqKept);
+        int numberNewPolicies = properties.size() - numberKeptPolicies;
+
+        // Mantieni le prime numberKeptPolicies
+        List<Property> updatedPolicies = new ArrayList<>(properties.subList(0, numberKeptPolicies));
+
+        // Traccia le coppie uniche di client e server
+        Set<String> uniquePairs = new HashSet<>();
+        for (Property property : updatedPolicies) {
+            uniquePairs.add(property.getSrc() + property.getDst());
+        }
+
+        // Genera nuove politiche
+        int generatedPolicies = 0;
+        while (generatedPolicies < numberNewPolicies) {
+            String src = rand.nextBoolean() ? allClients.get(rand.nextInt(allClients.size())).getName()
+                    : allServers.get(rand.nextInt(allServers.size())).getName();
+            String dst = rand.nextBoolean() ? allClients.get(rand.nextInt(allClients.size())).getName()
+                    : allServers.get(rand.nextInt(allServers.size())).getName();
+            if (!src.equals(dst) && !uniquePairs.contains(src + dst)) {
+                PName policyType = rand.nextBoolean() ? PName.REACHABILITY_PROPERTY : PName.ISOLATION_PROPERTY;
+                createPolicy(policyType, nfv, nfv.getGraphs().getGraph().get(0), src, dst);
+                uniquePairs.add(src + dst);
+                generatedPolicies++;
+            }
+        }
+
+        nfv.getPropertyDefinition().getProperty().clear();
+        nfv.getPropertyDefinition().getProperty().addAll(updatedPolicies);
         return nfv;
     }
-
-    public void setNfv(NFV nfv) {
-        this.nfv = nfv;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
-

@@ -123,6 +123,7 @@
                 <xsd:element ref="loadbalancer" />
                 <xsd:element ref="stateful_firewall" />
                 <xsd:element ref="web_application_firewall" />
+                <xsd:element ref="switch" />
             </xsd:choice>
             <xsd:attribute name="id" type="xsd:long" use="optional" />
             <xsd:attribute name="name" type="xsd:string"
@@ -328,6 +329,14 @@
      <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="name" type="xsd:string" default="Forwarder"
+                    nillable="true" />
+            </xsd:sequence>
+        </xsd:complexType>
+     </xsd:element>
+     <xsd:element name="switch">
+     <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="name" type="xsd:string" default="Switch"
                     nillable="true" />
             </xsd:sequence>
         </xsd:complexType>

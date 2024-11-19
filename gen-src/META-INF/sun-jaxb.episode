@@ -6,7 +6,7 @@
 Questo file è stato generato dall'architettura JavaTM per XML Binding (JAXB) Reference Implementation, v2.3.0 
 Vedere <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 Qualsiasi modifica a questo file andrà persa durante la ricompilazione dello schema di origine. 
-Generato il: 2024.08.15 alle 12:19:30 PM CEST 
+Generato il: 2024.11.19 alle 12:28:39 PM CET 
 
   -->
       
@@ -207,6 +207,12 @@ Generato il: 2024.08.15 alle 12:19:30 PM CEST
         <jaxb:bindings if-exists="true" scd="waf_elements">
                   
             <jaxb:class ref="it.polito.verefoo.jaxb.WafElements"/>
+                
+        </jaxb:bindings>
+            
+        <jaxb:bindings if-exists="true" scd="switch">
+                  
+            <jaxb:class ref="it.polito.verefoo.jaxb.Switch"/>
                 
         </jaxb:bindings>
             

@@ -11,6 +11,7 @@ package it.polito.verefoo.utils;
 	private long startMaxSMTtime;
 	private long endMaxSMTtims;
 	private int totalNumberGeneratedFlows;
+	private int numberReconfiguredNodes;
 	
 	public TestResults() {	
 	}
@@ -47,6 +48,14 @@ package it.polito.verefoo.utils;
 	public void setTotalFlows(long totalFlows) {
 		this.totalFlows = totalFlows;
 	}
+	
+	public int getNumberReconfiguredNodes() {
+        return numberReconfiguredNodes;
+    }
+
+    public void setNumberReconfiguredNodes(int numberReconfiguredNodes) {
+        this.numberReconfiguredNodes = numberReconfiguredNodes;
+    }
 	
 /******************************************************************MAXIMAL FLOWS*******************************************************************************/
 	public long getMaximalFlowsCompTime() {
@@ -90,5 +99,6 @@ package it.polito.verefoo.utils;
 	public void setZ3Result(String z3Result) {
 		this.z3Result = z3Result;
 	}
+	
 	
 }
