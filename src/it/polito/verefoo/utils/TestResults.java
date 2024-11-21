@@ -12,6 +12,9 @@ package it.polito.verefoo.utils;
 	private long endMaxSMTtims;
 	private int totalNumberGeneratedFlows;
 	private int numberReconfiguredNodes;
+	private long reconfiguredNetworkCompTime;
+	private long totalAtomicPredicates;
+	private int configuredNodes;
 	
 	public TestResults() {	
 	}
@@ -56,6 +59,21 @@ package it.polito.verefoo.utils;
     public void setNumberReconfiguredNodes(int numberReconfiguredNodes) {
         this.numberReconfiguredNodes = numberReconfiguredNodes;
     }
+
+	public long getReconfiguredNetworkCompTime() {
+		return reconfiguredNetworkCompTime;
+	}
+
+	public long getTotalAtomicPredicates() {
+		return this.totalAtomicPredicates;
+	}
+
+	public int getConfiguredNodes() {
+		return this.configuredNodes;
+	}
+
+
+
 	
 /******************************************************************MAXIMAL FLOWS*******************************************************************************/
 	public long getMaximalFlowsCompTime() {
