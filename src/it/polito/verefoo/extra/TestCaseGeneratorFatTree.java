@@ -19,6 +19,9 @@ public class TestCaseGeneratorFatTree {
     List<Node> allServers;
     List<Node> allSwitches;
     List<Node> allFWs;
+    List<Node> allAPs;
+    
+    
 
     private final int NODES_PER_SWITCH;
 
@@ -33,6 +36,7 @@ public class TestCaseGeneratorFatTree {
         this.allClients = new ArrayList<>();
         this.allServers = new ArrayList<>();
         this.allSwitches = new ArrayList<>();
+		this.allAPs = new ArrayList<Node>();
         this.allFWs = new ArrayList<Node>();
         this.allIPs = new HashSet<>();
 
@@ -86,6 +90,7 @@ public class TestCaseGeneratorFatTree {
         graph.getNode().addAll(allClients);
         graph.getNode().addAll(allServers);
         graph.getNode().addAll(allSwitches);
+		graph.getNode().addAll(allAPs);
 
         // Add the graph to NFV
         nfv.getGraphs().getGraph().add(graph);
@@ -146,6 +151,7 @@ public class TestCaseGeneratorFatTree {
         Node switchNode = new Node();
         switchNode.setName(createUniqueIP());
         switchNode.setFunctionalType(FunctionalTypes.FORWARDER);
+		allAPs.add(switchNode);
         return switchNode;
     }
 
